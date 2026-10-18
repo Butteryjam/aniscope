@@ -1,4 +1,5 @@
 import html
+import re
 
 import plotly.express as px
 import streamlit as st
@@ -121,6 +122,22 @@ def cached_anime_details(anime_id):
 def open_anime_details(anime_id):
     st.session_state.selected_anime_id = anime_id
     st.rerun()
+
+
+def clean_description(description):
+    if not description:
+        return "No synopsis is available."
+
+    description = html.unescape(description)
+    description = re.sub(
+        r"<br\s*/?>",
+        "\n",
+        description,
+        flags=re.IGNORECASE,
+    )
+    description = re.sub(r"<[^>]+>", "", description)
+
+    return description.strip()
 
 
 def show_anime_cards(anime_list):
@@ -547,7 +564,7 @@ def render_detail_page(anime_id):
             st.link_button("Open on AniList", anime["siteUrl"])
 
     st.subheader("Synopsis")
-    st.write(anime["description"] or "No synopsis is available.")
+    st.write(clean_description(anime["description"]))
 
 
 with st.sidebar:
